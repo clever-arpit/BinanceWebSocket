@@ -23,6 +23,15 @@ DerivedData
 **/.xcode.env.local
 
 # Android/IntelliJ
+
+#debug log
+android/app/build/outputs/apk/debug/app-debug.apk
+
+# android 
+android/app/release/app-release.apk
+android/caches
+android/wrapper/dists
+
 #
 build/
 .idea
