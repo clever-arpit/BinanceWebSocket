@@ -1,14 +1,17 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   Text,
-  Button,
   Dimensions,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  View,
+  Alert,
+  BackHandler,
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import Theme from '../utils/Theme';
+import { useFocusEffect } from '@react-navigation/native';
 
 const BINANCE_WS_URL = 'wss://stream.binance.com:9443/ws/btcusdt@trade';
 
@@ -37,18 +40,45 @@ const DashboardScreen = ({ navigation }) => {
     };
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert('Hold on!', 'Are you sure you want to exit?', [
+          { text: 'Cancel', style: 'cancel', onPress: () => null },
+          { text: 'YES', onPress: () => BackHandler.exitApp() },
+        ]);
+        return true;
+      };
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        onBackPress,
+      );
+      return () => backHandler.remove();
+    }, []),
+  );
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>BTC/USDT Price Graph</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          width: 60,
+        }}
+      >
+        <Text style={styles.leftText}>USDT</Text>
+      </View>
       {graphData.length > 1 && (
         <LineChart
           data={{
-            labels: [], // Index-based labels
+            labels: [],
             datasets: [{ data: graphData }],
           }}
           width={Dimensions.get('window').width - 20}
           height={220}
-          yAxisSuffix=" USDT"
+          yAxisSuffix=""
           chartConfig={{
             backgroundColor: Theme.white,
             backgroundGradientFrom: Theme.white,
@@ -81,6 +111,11 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingHorizontal: 20,
     backgroundColor: Theme.white,
+  },
+  leftText: {
+    fontSize: 13,
+    color: Theme.primary,
+    fontWeight: 'bold',
   },
   header: {
     fontSize: 24,
